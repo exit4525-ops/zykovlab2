@@ -186,15 +186,15 @@ void saveData(Pipe pipe, CompressorStation station)
 {
     ofstream file("data.txt");//открыть файл для записи
 
-    file << pipe.name << endl;
-    file << pipe.length << endl;
-    file << pipe.diameter << endl;
-    file << pipe.repair << endl;
+    file << "Pipe name: " << pipe.name << endl;
+    file << "Pipe length: " << pipe.length << endl;
+    file << "Pipe diameter: " << pipe.diameter << endl;
+    file << "Pipe is repair?: " << pipe.repair << endl;
 
-    file << station.name << endl;
-    file << station.workshopCount << endl;
-    file << station.workshopsInOperation << endl;
-    file << station.stationClass << endl;
+    file << "Station name: " << station.name << endl;
+    file << "WorkshopCount: " << station.workshopCount << endl;
+    file << "WorkshopCount in operation: " << station.workshopsInOperation << endl;
+    file << "Station class: " << station.stationClass << endl;
 
     file.close();
 
