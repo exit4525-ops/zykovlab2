@@ -1,8 +1,4 @@
-Pipe name: bob
-1488
-3
-1
-boba
-5
-2
-1
+Station name: 113
+WorkshopCount: 134
+WorkshopCount in operation: 12
+Station class: 4

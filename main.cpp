@@ -1,15 +1,15 @@
 #include <iostream>
 #include <string>
-#include <fstream> //чтение/запись в вайл
+#include <fstream>
 
-using namespace std; // убирает std::
+using namespace std;
 
-struct Pipe // структура трубы
+struct Pipe
 {
-    string name; // имя
-    double length; // длинна дробная или целая
+    string name;
+    double length;
     int diameter;
-    bool repair; //0/1
+    bool repair;
 };
 
 struct CompressorStation
@@ -18,17 +18,19 @@ struct CompressorStation
     int workshopCount;
     int workshopsInOperation;
     int stationClass;
-
 };
 
+
+// ввод трубы
 Pipe inputPipe()
 {
     Pipe pipe;
+
     cout << "Enter pipe name: ";
     cin >> pipe.name;
 
     cout << "Enter pipe length (km): ";
-    
+
     while (!(cin >> pipe.length) || pipe.length <= 0)
     {
         cout << "Wrong value. Enter length again: ";
@@ -38,7 +40,7 @@ Pipe inputPipe()
     }
 
     cout << "Enter pipe diameter (mm): ";
-    
+
     while (!(cin >> pipe.diameter) || pipe.diameter <= 0)
     {
         cout << "Wrong value. Enter diameter again: ";
@@ -50,8 +52,9 @@ Pipe inputPipe()
     int repairValue;
 
     cout << "Is pipe under repair? (1-y/0-n): ";
-    
-    while (!(cin >> repairValue) || (repairValue != 0 && repairValue != 1))
+
+    while (!(cin >> repairValue) ||
+           (repairValue != 0 && repairValue != 1))
     {
         cout << "Wrong value. Enter 1 or 0: ";
 
@@ -60,9 +63,12 @@ Pipe inputPipe()
     }
 
     pipe.repair = repairValue;
+
     return pipe;
 }
 
+
+// ввод станции
 CompressorStation inputStation()
 {
     CompressorStation station;
@@ -71,8 +77,9 @@ CompressorStation inputStation()
     cin >> station.name;
 
     cout << "Enter number of workshops: ";
-    
-    while (!(cin >> station.workshopCount) || station.workshopCount < 0)
+
+    while (!(cin >> station.workshopCount) ||
+           station.workshopCount < 0)
     {
         cout << "Wrong value. Enter number of workshops again: ";
 
@@ -81,10 +88,10 @@ CompressorStation inputStation()
     }
 
     cout << "Enter number of workshops in operation: ";
-    
-    while (!(cin >> station.workshopsInOperation) || 
-            station.workshopsInOperation < 0 ||
-            station.workshopsInOperation > station.workshopCount)
+
+    while (!(cin >> station.workshopsInOperation) ||
+           station.workshopsInOperation < 0 ||
+           station.workshopsInOperation > station.workshopCount)
     {
         cout << "Wrong value. Enter number of workshops in operation again: ";
 
@@ -93,8 +100,9 @@ CompressorStation inputStation()
     }
 
     cout << "Enter station class: ";
-    
-    while (!(cin >> station.stationClass) || station.stationClass < 0)
+
+    while (!(cin >> station.stationClass) ||
+           station.stationClass < 0)
     {
         cout << "Wrong value. Enter station class again: ";
 
@@ -103,16 +111,18 @@ CompressorStation inputStation()
     }
 
     return station;
-
 }
 
+
+// вывод трубы
 void printPipe(Pipe pipe)
 {
     cout << "--- Pipe ---" << endl;
     cout << "Name: " << pipe.name << endl;
     cout << "Length: " << pipe.length << " km" << endl;
     cout << "Diameter: " << pipe.diameter << " mm" << endl;
-    if (pipe.repair == true)
+
+    if (pipe.repair)
     {
         cout << "Repair: Yes" << endl;
     }
@@ -122,27 +132,27 @@ void printPipe(Pipe pipe)
     }
 }
 
-void editPipe(Pipe &pipe) // & - изменяет оригинал, а не создает копию
+
+// изменение статуса ремонта трубы
+void editPipe(Pipe &pipe)
 {
-    if (pipe.repair == true)
-    {
-        pipe.repair = false;
-    }
-    else 
-    {
-        pipe.repair = true;
-    }
+    pipe.repair = !pipe.repair;
 }
 
+
+// вывод станции
 void printCompressorStation(CompressorStation station)
 {
     cout << "--- Compressor Station ---" << endl;
     cout << "Name: " << station.name << endl;
     cout << "Workshops: " << station.workshopCount << endl;
-    cout << "Workshops in operation: " << station.workshopsInOperation << endl;
+    cout << "Workshops in operation: "
+         << station.workshopsInOperation << endl;
     cout << "Station class: " << station.stationClass << endl;
 }
 
+
+// запуск/останов цеха
 void editStation(CompressorStation &station)
 {
     int choice;
@@ -150,7 +160,15 @@ void editStation(CompressorStation &station)
     cout << "1. Start workshop" << endl;
     cout << "2. Stop workshop" << endl;
     cout << "Enter choice: ";
-    cin >> choice;
+
+    while (!(cin >> choice) ||
+           (choice != 1 && choice != 2))
+    {
+        cout << "Wrong number. Input new choice: ";
+
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
 
     if (choice == 1)
     {
@@ -164,7 +182,7 @@ void editStation(CompressorStation &station)
             cout << "All workshops are already working" << endl;
         }
     }
-    else if (choice == 2)
+    else
     {
         if (station.workshopsInOperation > 0)
         {
@@ -176,36 +194,55 @@ void editStation(CompressorStation &station)
             cout << "No working workshops" << endl;
         }
     }
-    else
-    {
-        cout << "Wrong choice" << endl;
-    }
 }
 
+
+// сохранение трубы в уже открытый файл
+void savePipe(ofstream &file, Pipe pipe)
+{
+    file << pipe.name << endl;
+    file << pipe.length << endl;
+    file << pipe.diameter << endl;
+    file << pipe.repair << endl;
+}
+
+
+// сохранение станции в уже открытый файл
+void saveStation(ofstream &file, CompressorStation station)
+{
+    file << station.name << endl;
+    file << station.workshopCount << endl;
+    file << station.workshopsInOperation << endl;
+    file << station.stationClass << endl;
+}
+
+
+// общее сохранение в один файл
 void saveData(Pipe pipe, CompressorStation station)
 {
-    ofstream file("data.txt");//открыть файл для записи
+    ofstream file("data.txt");
 
-    file << "Pipe name: " << pipe.name << endl;
-    file << "Pipe length: " << pipe.length << endl;
-    file << "Pipe diameter: " << pipe.diameter << endl;
-    file << "Pipe is repair?: " << pipe.repair << endl;
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
 
-    file << "Station name: " << station.name << endl;
-    file << "WorkshopCount: " << station.workshopCount << endl;
-    file << "WorkshopCount in operation: " << station.workshopsInOperation << endl;
-    file << "Station class: " << station.stationClass << endl;
+    savePipe(file, pipe);
+    saveStation(file, station);
 
     file.close();
 
     cout << "Data saved" << endl;
 }
 
+
+// загрузка из одного файла
 bool loadData(Pipe &pipe, CompressorStation &station)
 {
-    ifstream file("data.txt"); //чтение из файла
+    ifstream file("data.txt");
 
-    if (!file)//наличие файла
+    if (!file)
     {
         cout << "File not found" << endl;
         return false;
@@ -224,13 +261,16 @@ bool loadData(Pipe &pipe, CompressorStation &station)
     file.close();
 
     cout << "Data loaded" << endl;
+
     return true;
 }
 
+
 int main()
 {
-    Pipe pipe; // P - тип данных, p - переменная
-    CompressorStation station; 
+    Pipe pipe;
+    CompressorStation station;
+
     bool pipeExists = false;
     bool stationExists = false;
 
@@ -238,26 +278,30 @@ int main()
 
     while (command != 0)
     {
-        cout << endl; 
+        cout << endl;
+
         cout << "1. Add pipe" << endl;
         cout << "2. Add compressor station" << endl;
         cout << "3. View all objects" << endl;
         cout << "4. Edit pipe status" << endl;
-        cout << "5. Edit Compressor station" << endl;
+        cout << "5. Edit compressor station" << endl;
         cout << "6. Save" << endl;
         cout << "7. Load" << endl;
         cout << "0. Exit" << endl;
 
         cout << "Enter command: ";
-        
-        while (!(cin >> command) || command < 0 || command > 7)
+
+        while (!(cin >> command) ||
+               command < 0 ||
+               command > 7)
         {
             cout << "Wrong command. Enter number from 0 to 7: ";
 
             cin.clear();
             cin.ignore(10000, '\n');
         }
-        
+
+
         switch (command)
         {
             case 1:
@@ -265,13 +309,15 @@ int main()
                 pipeExists = true;
                 break;
 
+
             case 2:
                 station = inputStation();
                 stationExists = true;
                 break;
-            
+
+
             case 3:
-                if (pipeExists == true)
+                if (pipeExists)
                 {
                     printPipe(pipe);
                 }
@@ -282,7 +328,7 @@ int main()
 
                 cout << endl;
 
-                if (stationExists == true)
+                if (stationExists)
                 {
                     printCompressorStation(station);
                 }
@@ -290,22 +336,27 @@ int main()
                 {
                     cout << "Station not added" << endl;
                 }
+
                 break;
-            
+
+
             case 4:
-                if (pipeExists == true)
+                if (pipeExists)
                 {
                     editPipe(pipe);
+
                     cout << "Pipe repair status changed" << endl;
                 }
                 else
                 {
                     cout << "Pipe not added" << endl;
                 }
+
                 break;
-            
+
+
             case 5:
-                if (stationExists == true)
+                if (stationExists)
                 {
                     editStation(station);
                 }
@@ -313,31 +364,37 @@ int main()
                 {
                     cout << "Station not added" << endl;
                 }
+
                 break;
-            
+
+
             case 6:
-                if (pipeExists == true && stationExists == true)
+                if (pipeExists && stationExists)
                 {
                     saveData(pipe, station);
                 }
                 else
                 {
-                    cout << "Add pipe & station first" << endl;
+                    cout << "Add pipe and station first" << endl;
                 }
+
                 break;
 
+
             case 7:
-                if (loadData(pipe, station) == true)
+                if (loadData(pipe, station))
                 {
                     pipeExists = true;
                     stationExists = true;
                 }
-                
+
                 break;
+
 
             case 0:
                 cout << "Exit" << endl;
                 break;
+
 
             default:
                 cout << "Wrong command" << endl;
