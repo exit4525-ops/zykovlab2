@@ -1,4 +1,8 @@
-Station name: 113
-WorkshopCount: 134
-WorkshopCount in operation: 12
-Station class: 4
+pipe
+125
+40
+1
+kc
+16
+12
+4
