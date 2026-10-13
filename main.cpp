@@ -217,6 +217,157 @@ void saveStation(ofstream &file, CompressorStation station)
 }
 
 
+// отдельное сохранение трубы
+void savePipeToFile(Pipe pipe)
+{
+    ofstream file("Pipedata.txt");
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    savePipe(file, pipe);
+    file.close();
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    cout << "Pipe saved" << endl;
+}
+
+
+// отдельное сохранение станции
+void saveStationToFile(CompressorStation station)
+{
+    ofstream file("Stationdata.txt");
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    saveStation(file, station);
+    file.close();
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    cout << "Station saved" << endl;
+}
+
+
+// чтение и проверка данных трубы
+bool readPipe(ifstream &file, Pipe &pipe)
+{
+    Pipe loadedPipe;
+
+    if (!(file >> loadedPipe.name >> loadedPipe.length
+               >> loadedPipe.diameter >> loadedPipe.repair) ||
+        loadedPipe.length <= 0 || loadedPipe.diameter <= 0)
+    {
+        return false;
+    }
+
+    pipe = loadedPipe;
+    return true;
+}
+
+
+// чтение и проверка данных станции
+bool readStation(ifstream &file, CompressorStation &station)
+{
+    CompressorStation loadedStation;
+
+    if (!(file >> loadedStation.name >> loadedStation.workshopCount
+               >> loadedStation.workshopsInOperation >> loadedStation.stationClass) ||
+        loadedStation.workshopCount < 0 ||
+        loadedStation.workshopsInOperation < 0 ||
+        loadedStation.workshopsInOperation > loadedStation.workshopCount ||
+        loadedStation.stationClass < 0)
+    {
+        return false;
+    }
+
+    station = loadedStation;
+    return true;
+}
+
+
+// отдельная загрузка трубы
+bool loadPipeFromFile(Pipe &pipe)
+{
+    ifstream file("Pipedata.txt");
+
+    if (!file)
+    {
+        cout << "File not found" << endl;
+        return false;
+    }
+
+    if (!readPipe(file, pipe))
+    {
+        cout << "Invalid pipe data" << endl;
+        return false;
+    }
+
+    cout << "Pipe loaded" << endl;
+    return true;
+}
+
+
+// отдельная загрузка станции
+bool loadStationFromFile(CompressorStation &station)
+{
+    ifstream file("Stationdata.txt");
+
+    if (!file)
+    {
+        cout << "File not found" << endl;
+        return false;
+    }
+
+    if (!readStation(file, station))
+    {
+        cout << "Invalid station data" << endl;
+        return false;
+    }
+
+    cout << "Station loaded" << endl;
+    return true;
+}
+
+
+// выбор объектов для сохранения или загрузки
+int chooseObjects()
+{
+    int choice;
+
+    cout << "1. Pipe only (Pipedata.txt)" << endl;
+    cout << "2. Station only (Stationdata.txt)" << endl;
+    cout << "3. Both objects (data.txt)" << endl;
+    cout << "0. Back" << endl;
+    cout << "Enter choice: ";
+
+    while (!(cin >> choice) || choice < 0 || choice > 3)
+    {
+        cout << "Wrong choice. Enter number from 0 to 3: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    return choice;
+}
+
+
 // общее сохранение в один файл
 void saveData(Pipe pipe, CompressorStation station)
 {
@@ -233,6 +384,12 @@ void saveData(Pipe pipe, CompressorStation station)
 
     file.close();
 
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
     cout << "Data saved" << endl;
 }
 
@@ -248,15 +405,17 @@ bool loadData(Pipe &pipe, CompressorStation &station)
         return false;
     }
 
-    file >> pipe.name;
-    file >> pipe.length;
-    file >> pipe.diameter;
-    file >> pipe.repair;
+    Pipe loadedPipe;
+    CompressorStation loadedStation;
 
-    file >> station.name;
-    file >> station.workshopCount;
-    file >> station.workshopsInOperation;
-    file >> station.stationClass;
+    if (!readPipe(file, loadedPipe) || !readStation(file, loadedStation))
+    {
+        cout << "Invalid data" << endl;
+        return false;
+    }
+
+    pipe = loadedPipe;
+    station = loadedStation;
 
     file.close();
 
@@ -369,23 +528,57 @@ int main()
 
 
             case 6:
-                if (pipeExists && stationExists)
                 {
-                    saveData(pipe, station);
-                }
-                else
-                {
-                    cout << "Add pipe and station first" << endl;
+                    int choice = chooseObjects();
+
+                    if (choice == 1)
+                    {
+                        if (pipeExists)
+                            savePipeToFile(pipe);
+                        else
+                            cout << "Pipe not added" << endl;
+                    }
+                    else if (choice == 2)
+                    {
+                        if (stationExists)
+                            saveStationToFile(station);
+                        else
+                            cout << "Station not added" << endl;
+                    }
+                    else if (choice == 3)
+                    {
+                        if (pipeExists && stationExists)
+                            saveData(pipe, station);
+                        else
+                            cout << "Add pipe and station first" << endl;
+                    }
                 }
 
                 break;
 
 
             case 7:
-                if (loadData(pipe, station))
                 {
-                    pipeExists = true;
-                    stationExists = true;
+                    int choice = chooseObjects();
+
+                    if (choice == 1)
+                    {
+                        if (loadPipeFromFile(pipe))
+                            pipeExists = true;
+                    }
+                    else if (choice == 2)
+                    {
+                        if (loadStationFromFile(station))
+                            stationExists = true;
+                    }
+                    else if (choice == 3)
+                    {
+                        if (loadData(pipe, station))
+                        {
+                            pipeExists = true;
+                            stationExists = true;
+                        }
+                    }
                 }
 
                 break;
