@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <unordered_map> 
 
 using namespace std;
 
@@ -369,9 +370,15 @@ int chooseObjects()
 
 
 // общее сохранение в один файл
-void saveData(Pipe pipe, CompressorStation station)
+void saveData(const unordered_map<int, Pipe> &pipes,
+              const unordered_map<int, CompressorStation> &stations,
+              int nextId)
 {
-    ofstream file("data.txt");
+    string filename;
+    cout << "Enter filename: ";
+    getline(cin >> ws, filename);
+
+    ofstream file(filename);
 
     if (!file)
     {
@@ -379,8 +386,23 @@ void saveData(Pipe pipe, CompressorStation station)
         return;
     }
 
-    savePipe(file, pipe);
-    saveStation(file, station);
+    file << nextId << '\n';
+
+    file << pipes.size() << '\n';
+
+    for (const auto &item : pipes)
+    {
+        file << item.first << '\n';
+        savePipe(file, item.second);
+    }
+
+    file << stations.size() << '\n';
+
+    for (const auto &item : stations)
+    {
+        file << item.first << '\n';
+        saveStation(file, item.second);
+    }
 
     file.close();
 
@@ -395,9 +417,15 @@ void saveData(Pipe pipe, CompressorStation station)
 
 
 // загрузка из одного файла
-bool loadData(Pipe &pipe, CompressorStation &station)
+bool loadData(unordered_map<int, Pipe> &pipes,
+              unordered_map<int, CompressorStation> &stations,
+              int &nextId)
 {
-    ifstream file("data.txt");
+    string filename;
+    cout << "Enter filename: ";
+    getline(cin >> ws, filename);
+
+    ifstream file(filename);
 
     if (!file)
     {
@@ -405,33 +433,80 @@ bool loadData(Pipe &pipe, CompressorStation &station)
         return false;
     }
 
-    Pipe loadedPipe;
-    CompressorStation loadedStation;
+    unordered_map<int, Pipe> loadedPipes;
+    unordered_map<int, CompressorStation> loadedStations;
 
-    if (!readPipe(file, loadedPipe) || !readStation(file, loadedStation))
+    int loadedNextId;
+    int pipeCount;
+    int stationCount;
+
+    if (!(file >> loadedNextId >> pipeCount) ||
+        loadedNextId <= 0 || pipeCount < 0)
     {
         cout << "Invalid data" << endl;
         return false;
     }
 
-    pipe = loadedPipe;
-    station = loadedStation;
+    for (int i = 0; i < pipeCount; i++)
+    {
+        int id;
+        Pipe pipe;
 
-    file.close();
+        if (!(file >> id) || id <= 0 || id >= loadedNextId ||
+            !readPipe(file, pipe))
+        {
+            cout << "Invalid pipe data" << endl;
+            return false;
+        }
+
+        if (!loadedPipes.emplace(id, pipe).second)
+        {
+            cout << "Duplicate ID" << endl;
+            return false;
+        }
+    }
+
+    if (!(file >> stationCount) || stationCount < 0)
+    {
+        cout << "Invalid data" << endl;
+        return false;
+    }
+
+    for (int i = 0; i < stationCount; i++)
+    {
+        int id;
+        CompressorStation station;
+
+        if (!(file >> id) || id <= 0 || id >= loadedNextId ||
+            !readStation(file, station))
+        {
+            cout << "Invalid station data" << endl;
+            return false;
+        }
+
+        if (loadedPipes.find(id) != loadedPipes.end() ||
+            !loadedStations.emplace(id, station).second)
+        {
+            cout << "Duplicate ID" << endl;
+            return false;
+        }
+    }
+
+    pipes.swap(loadedPipes);
+    stations.swap(loadedStations);
+    nextId = loadedNextId;
 
     cout << "Data loaded" << endl;
-
     return true;
 }
 
 
 int main()
 {
-    Pipe pipe;
-    CompressorStation station;
+    unordered_map<int, Pipe> pipes;
+    unordered_map<int, CompressorStation> stations;
 
-    bool pipeExists = false;
-    bool stationExists = false;
+    int nextId = 1;
 
     int command = -1;
 
@@ -440,10 +515,10 @@ int main()
         cout << endl;
 
         cout << "1. Add pipe" << endl;
-        cout << "2. Add compressor station" << endl;
+        cout << "2. Add compressor stations" << endl;
         cout << "3. View all objects" << endl;
         cout << "4. Edit pipe status" << endl;
-        cout << "5. Edit compressor station" << endl;
+        cout << "5. Edit compressor stations" << endl;
         cout << "6. Save" << endl;
         cout << "7. Load" << endl;
         cout << "0. Exit" << endl;
@@ -464,124 +539,123 @@ int main()
         switch (command)
         {
             case 1:
-                pipe = inputPipe();
-                pipeExists = true;
+            {
+                pipes.emplace(nextId, inputPipe());
+                cout << "Pipe added. ID: " << nextId << endl;
+                nextId++;
                 break;
+            }
 
 
             case 2:
-                station = inputStation();
-                stationExists = true;
+            {
+                stations.emplace(nextId, inputStation());
+                cout << "Station added. ID: " << nextId << endl;
+                nextId++;
                 break;
+            }
 
 
             case 3:
-                if (pipeExists)
+            {
+                if (pipes.empty())
                 {
-                    printPipe(pipe);
+                    cout << "No pipes added" << endl;
                 }
                 else
                 {
-                    cout << "Pipe not added" << endl;
+                    for (const auto &item : pipes)
+                    {
+                        cout << "ID: " << item.first << endl;
+                        printPipe(item.second);
+                        cout << endl;
+                    }
                 }
-
-                cout << endl;
-
-                if (stationExists)
+                if (stations.empty())
                 {
-                    printCompressorStation(station);
+                    cout << "No stations added" << endl;
                 }
                 else
                 {
-                    cout << "Station not added" << endl;
+                    for (const auto &item : stations)
+                    {
+                        cout << "ID: " << item.first << endl;
+                        printCompressorStation(item.second);
+                        cout << endl;
+                    }
                 }
 
-                break;
+                break; 
+            }
 
 
             case 4:
-                if (pipeExists)
-                {
-                    editPipe(pipe);
+            {
+                int id;
+                cout << "Enter pipe ID: ";
 
+                while (!(cin >> id) || id <= 0)
+                {
+                    cout << "Wrong ID. Enter a positive integer: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+
+                auto it = pipes.find(id);
+
+                if (it != pipes.end())
+                {
+                    editPipe(it->second);
                     cout << "Pipe repair status changed" << endl;
                 }
                 else
                 {
-                    cout << "Pipe not added" << endl;
+                    cout << "Pipe not found" << endl;
                 }
 
                 break;
+            }
 
 
             case 5:
-                if (stationExists)
+            {
+                int id;
+                cout << "Enter stations ID: ";
+
+                while (!(cin >> id) || id <= 0)
                 {
-                    editStation(station);
+                    cout << "Wrong ID. Enter a positive integer: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+
+                auto it = stations.find(id);
+
+                if (it != stations.end())
+                {
+                    editStation(it->second);
                 }
                 else
                 {
-                    cout << "Station not added" << endl;
+                    cout << "Station not found" << endl;
                 }
 
                 break;
+            }
 
 
             case 6:
-                {
-                    int choice = chooseObjects();
-
-                    if (choice == 1)
-                    {
-                        if (pipeExists)
-                            savePipeToFile(pipe);
-                        else
-                            cout << "Pipe not added" << endl;
-                    }
-                    else if (choice == 2)
-                    {
-                        if (stationExists)
-                            saveStationToFile(station);
-                        else
-                            cout << "Station not added" << endl;
-                    }
-                    else if (choice == 3)
-                    {
-                        if (pipeExists && stationExists)
-                            saveData(pipe, station);
-                        else
-                            cout << "Add pipe and station first" << endl;
-                    }
-                }
-
+            {
+                saveData(pipes, stations, nextId);
                 break;
+            }
 
 
             case 7:
-                {
-                    int choice = chooseObjects();
-
-                    if (choice == 1)
-                    {
-                        if (loadPipeFromFile(pipe))
-                            pipeExists = true;
-                    }
-                    else if (choice == 2)
-                    {
-                        if (loadStationFromFile(station))
-                            stationExists = true;
-                    }
-                    else if (choice == 3)
-                    {
-                        if (loadData(pipe, station))
-                        {
-                            pipeExists = true;
-                            stationExists = true;
-                        }
-                    }
-                }
-
+            {
+                loadData(pipes, stations, nextId);
                 break;
+            }
 
 
             case 0:
