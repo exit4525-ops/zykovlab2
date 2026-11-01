@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <cmath>
 #include <unordered_map> 
 
 using namespace std;
@@ -500,6 +501,133 @@ bool loadData(unordered_map<int, Pipe> &pipes,
     return true;
 }
 
+void findPipesByName(const unordered_map<int, Pipe> &pipes)
+{
+    string name;
+    cout << "Enter pipe name or part of name: ";
+    getline(cin >> ws, name);
+
+    bool found = false;
+
+    for (const auto &item : pipes)
+    {
+        if (item.second.name.find(name) != string::npos)
+        {
+            cout << "ID: " << item.first << endl;
+            printPipe(item.second);
+            cout << endl;
+
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "No pipes found" << endl;
+    }
+}
+
+void findPipesByRepair(const unordered_map<int, Pipe> &pipes)
+{
+    int repair;
+    cout << "Find pipes under repair? (1-yes/0-no): ";
+
+    while (!(cin >> repair) || (repair != 0 && repair != 1))
+    {
+        cout << "Wrong value. Enter 1 or 0: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    bool found = false;
+
+    for (const auto &item : pipes)
+    {
+        if (item.second.repair == static_cast<bool>(repair))
+        {
+            cout << "ID: " << item.first << endl;
+            printPipe(item.second);
+            cout << endl;
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "No pipes found" << endl;
+    }
+}
+
+void findStationsByName(
+    const unordered_map<int, CompressorStation> &stations)
+{
+    string name;
+    cout << "Enter station name or part of name: ";
+    getline(cin >> ws, name);
+
+    bool found = false;
+
+    for (const auto &item : stations)
+    {
+        if (item.second.name.find(name) != string::npos)
+        {
+            cout << "ID: " << item.first << endl;
+            printCompressorStation(item.second);
+            cout << endl;
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "No stations found" << endl;
+    }
+}
+
+void findStationsByUnusedPercent(
+    const unordered_map<int, CompressorStation> &stations)
+{
+    double threshold;
+    cout << "Enter minimum unused workshops percentage (0-100): ";
+
+    while (!(cin >> threshold) || !isfinite(threshold) ||
+           threshold < 0 || threshold > 100)
+    {
+        cout << "Wrong value. Enter a percentage from 0 to 100: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    bool found = false;
+
+    for (const auto &item : stations)
+    {
+        const CompressorStation &station = item.second;
+
+        if (station.workshopCount == 0)
+        {
+            continue;
+        }
+
+        double unusedPercent =
+            100.0 * (station.workshopCount - station.workshopsInOperation)
+            / station.workshopCount;
+
+        if (unusedPercent >= threshold)
+        {
+            cout << "ID: " << item.first << endl;
+            printCompressorStation(station);
+            cout << "Unused workshops: " << unusedPercent << "%" << endl;
+            cout << endl;
+            found = true;
+        }
+    }
+
+    if (!found)
+    {
+        cout << "No stations found" << endl;
+    }
+}
 
 int main()
 {
@@ -521,15 +649,21 @@ int main()
         cout << "5. Edit compressor stations" << endl;
         cout << "6. Save" << endl;
         cout << "7. Load" << endl;
+        cout << "8. Delete pipe" << endl;
+        cout << "9 Delete KS" << endl;
+        cout << "10. Find pipes by name" << endl;
+        cout << "11. Find pipes by repair status" << endl;
+        cout << "12. Find stations by name" << endl;
+        cout << "13. Find stations by unused workshops percentage" << endl;
         cout << "0. Exit" << endl;
 
         cout << "Enter command: ";
 
         while (!(cin >> command) ||
                command < 0 ||
-               command > 7)
+               command > 13)
         {
-            cout << "Wrong command. Enter number from 0 to 7: ";
+            cout << "Wrong command. Enter number from 0 to 13: ";
 
             cin.clear();
             cin.ignore(10000, '\n');
@@ -657,6 +791,76 @@ int main()
                 break;
             }
 
+            case 8:
+            {
+                int id;
+                cout << "Enter pipe ID: ";
+
+                while (!(cin >> id) || id <= 0)
+                {
+                    cout << "Wrong ID. Enter a positive integer: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+
+                if (pipes.erase(id))
+                {
+                    cout << "Pipe deleted" << endl;
+                }
+                else
+                {
+                    cout << "Pipe not found" << endl;
+                }
+
+                break;
+            }
+
+            case 9:
+            {
+                int id;
+                cout << "Enter station ID: ";
+
+                while (!(cin >> id) || id <= 0)
+                {
+                    cout << "Wrong ID. Enter a positive integer: ";
+                    cin.clear();
+                    cin.ignore(10000, '\n');
+                }
+                if (stations.erase(id))
+                {
+                    cout << "Station deleted" << endl;
+                }
+                else 
+                {
+                    cout << "Statiom not found" << endl;
+                }
+
+                break;
+            }
+
+            case 10:
+            {
+                findPipesByName(pipes);
+                break;
+            }
+
+            case 11:
+            {
+                findPipesByRepair(pipes);
+                break;
+            }
+
+            case 12:
+            {
+                findStationsByName(stations);
+                break;
+            }
+
+            case 13:
+            {
+                findStationsByUnusedPercent(stations);
+                break;
+            }
 
             case 0:
                 cout << "Exit" << endl;
