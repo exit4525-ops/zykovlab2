@@ -1,5 +1,6 @@
 #pragma once
-
+#include <unordered_map>
+#include <vector>
 #include <string>
 
 struct Pipe
@@ -13,3 +14,5 @@ struct Pipe
 Pipe inputPipe();
 void printPipe(Pipe pipe);
 void editPipe(Pipe &pipe);
+void editPipes(std::unordered_map<int, Pipe>
+&pipes, const std::vector<int> &ids);

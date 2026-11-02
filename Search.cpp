@@ -5,13 +5,13 @@
 
 using namespace std;
 
-void findPipesByName(const unordered_map<int, Pipe> &pipes)
+vector<int> findPipesByName(const unordered_map<int, Pipe> &pipes)
 {
     string name;
     cout << "Enter pipe name or part of name: ";
     getline(cin >> ws, name);
 
-    bool found = false;
+    vector<int> foundIds;
 
     for (const auto &item : pipes)
     {
@@ -21,17 +21,19 @@ void findPipesByName(const unordered_map<int, Pipe> &pipes)
             printPipe(item.second);
             cout << endl;
 
-            found = true;
+            foundIds.push_back(item.first);
         }
     }
 
-    if (!found)
+    if (foundIds.empty())
     {
         cout << "No pipes found" << endl;
     }
+
+    return foundIds;
 }
 
-void findPipesByRepair(const unordered_map<int, Pipe> &pipes)
+vector<int> findPipesByRepair(const unordered_map<int, Pipe> &pipes)
 {
     int repair;
     cout << "Find pipes under repair? (1-yes/0-no): ";
@@ -43,7 +45,7 @@ void findPipesByRepair(const unordered_map<int, Pipe> &pipes)
         cin.ignore(10000, '\n');
     }
 
-    bool found = false;
+    vector<int> foundIds;
 
     for (const auto &item : pipes)
     {
@@ -52,14 +54,15 @@ void findPipesByRepair(const unordered_map<int, Pipe> &pipes)
             cout << "ID: " << item.first << endl;
             printPipe(item.second);
             cout << endl;
-            found = true;
+            foundIds.push_back(item.first);
         }
     }
 
-    if (!found)
+    if (foundIds.empty())
     {
         cout << "No pipes found" << endl;
     }
+    return foundIds;
 }
 
 void findStationsByName(

@@ -70,3 +70,75 @@ void editPipe(Pipe &pipe)
 {
     pipe.repair = !pipe.repair;
 }
+
+void editPipes(unordered_map<int, Pipe> &pipes,
+               const vector<int> &ids)
+{
+    if (ids.empty())
+    {
+        return;
+    }
+
+    int mode;
+    cout << "1. Edit all found pipes" << endl;
+    cout << "2. Select pipes individually" << endl;
+    cout << "0. Cancel" << endl;
+
+    while (!(cin >> mode) || mode < 0 || mode > 2)
+    {
+        cout << "Enter 0, 1 or 2: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    if (mode == 0)
+    {
+        return;
+    }
+
+    int repair;
+    cout << "New repair status (1-yes/0-no): ";
+
+    while (!(cin >> repair) || (repair != 0 && repair != 1))
+    {
+        cout << "Enter 1 or 0: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    int changed = 0;
+
+    for (int id : ids)
+    {
+        auto it = pipes.find(id);
+
+        if (it == pipes.end())
+        {
+            continue;
+        }
+
+        if (mode == 2)
+        {
+            int selected;
+            cout << "Edit pipe ID " << id << "? (1-yes/0-no): ";
+
+            while (!(cin >> selected) ||
+                   (selected != 0 && selected != 1))
+            {
+                cout << "Enter 1 or 0: ";
+                cin.clear();
+                cin.ignore(10000, '\n');
+            }
+
+            if (selected == 0)
+            {
+                continue;
+            }
+        }
+
+        it->second.repair = (repair == 1);
+        changed++;
+    }
+
+    cout << "Pipes processed: " << changed << endl;
+}

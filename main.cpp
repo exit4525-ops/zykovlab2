@@ -29,7 +29,7 @@ int main()
         cout << "6. Save" << endl;
         cout << "7. Load" << endl;
         cout << "8. Delete pipe" << endl;
-        cout << "9 Delete KS" << endl;
+        cout << "9. Delete KS" << endl;
         cout << "10. Find pipes by name" << endl;
         cout << "11. Find pipes by repair status" << endl;
         cout << "12. Find stations by name" << endl;
@@ -219,13 +219,15 @@ int main()
 
             case 10:
             {
-                findPipesByName(pipes);
+                auto ids = findPipesByName(pipes);
+                editPipes(pipes, ids);
                 break;
             }
 
             case 11:
             {
-                findPipesByRepair(pipes);
+                auto ids = findPipesByRepair(pipes);
+                editPipes(pipes, ids);
                 break;
             }
 
