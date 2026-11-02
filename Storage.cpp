@@ -1,0 +1,286 @@
+#include "Storage.h"
+
+#include <iostream>
+
+using namespace std;
+
+void savePipe(ofstream &file, Pipe pipe)
+{
+    file << pipe.name << endl;
+    file << pipe.length << endl;
+    file << pipe.diameter << endl;
+    file << pipe.repair << endl;
+}
+
+void saveStation(ofstream &file, CompressorStation station)
+{
+    file << station.name << endl;
+    file << station.workshopCount << endl;
+    file << station.workshopsInOperation << endl;
+    file << station.stationClass << endl;
+}
+
+void savePipeToFile(Pipe pipe)
+{
+    ofstream file("Pipedata.txt");
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    savePipe(file, pipe);
+    file.close();
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    cout << "Pipe saved" << endl;
+}
+
+void saveStationToFile(CompressorStation station)
+{
+    ofstream file("Stationdata.txt");
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    saveStation(file, station);
+    file.close();
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    cout << "Station saved" << endl;
+}
+
+bool readPipe(ifstream &file, Pipe &pipe)
+{
+    Pipe loadedPipe;
+
+    if (!(file >> loadedPipe.name >> loadedPipe.length
+               >> loadedPipe.diameter >> loadedPipe.repair) ||
+        loadedPipe.length <= 0 || loadedPipe.diameter <= 0)
+    {
+        return false;
+    }
+
+    pipe = loadedPipe;
+    return true;
+}
+
+bool readStation(ifstream &file, CompressorStation &station)
+{
+    CompressorStation loadedStation;
+
+    if (!(file >> loadedStation.name >> loadedStation.workshopCount
+               >> loadedStation.workshopsInOperation >> loadedStation.stationClass) ||
+        loadedStation.workshopCount < 0 ||
+        loadedStation.workshopsInOperation < 0 ||
+        loadedStation.workshopsInOperation > loadedStation.workshopCount ||
+        loadedStation.stationClass < 0)
+    {
+        return false;
+    }
+
+    station = loadedStation;
+    return true;
+}
+
+bool loadPipeFromFile(Pipe &pipe)
+{
+    ifstream file("Pipedata.txt");
+
+    if (!file)
+    {
+        cout << "File not found" << endl;
+        return false;
+    }
+
+    if (!readPipe(file, pipe))
+    {
+        cout << "Invalid pipe data" << endl;
+        return false;
+    }
+
+    cout << "Pipe loaded" << endl;
+    return true;
+}
+
+bool loadStationFromFile(CompressorStation &station)
+{
+    ifstream file("Stationdata.txt");
+
+    if (!file)
+    {
+        cout << "File not found" << endl;
+        return false;
+    }
+
+    if (!readStation(file, station))
+    {
+        cout << "Invalid station data" << endl;
+        return false;
+    }
+
+    cout << "Station loaded" << endl;
+    return true;
+}
+
+int chooseObjects()
+{
+    int choice;
+
+    cout << "1. Pipe only (Pipedata.txt)" << endl;
+    cout << "2. Station only (Stationdata.txt)" << endl;
+    cout << "3. Both objects (data.txt)" << endl;
+    cout << "0. Back" << endl;
+    cout << "Enter choice: ";
+
+    while (!(cin >> choice) || choice < 0 || choice > 3)
+    {
+        cout << "Wrong choice. Enter number from 0 to 3: ";
+        cin.clear();
+        cin.ignore(10000, '\n');
+    }
+
+    return choice;
+}
+
+void saveData(const unordered_map<int, Pipe> &pipes,
+              const unordered_map<int, CompressorStation> &stations,
+              int nextId)
+{
+    string filename;
+    cout << "Enter filename: ";
+    getline(cin >> ws, filename);
+
+    ofstream file(filename);
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    file << nextId << '\n';
+
+    file << pipes.size() << '\n';
+
+    for (const auto &item : pipes)
+    {
+        file << item.first << '\n';
+        savePipe(file, item.second);
+    }
+
+    file << stations.size() << '\n';
+
+    for (const auto &item : stations)
+    {
+        file << item.first << '\n';
+        saveStation(file, item.second);
+    }
+
+    file.close();
+
+    if (!file)
+    {
+        cout << "File error" << endl;
+        return;
+    }
+
+    cout << "Data saved" << endl;
+}
+
+bool loadData(unordered_map<int, Pipe> &pipes,
+              unordered_map<int, CompressorStation> &stations,
+              int &nextId)
+{
+    string filename;
+    cout << "Enter filename: ";
+    getline(cin >> ws, filename);
+
+    ifstream file(filename);
+
+    if (!file)
+    {
+        cout << "File not found" << endl;
+        return false;
+    }
+
+    unordered_map<int, Pipe> loadedPipes;
+    unordered_map<int, CompressorStation> loadedStations;
+
+    int loadedNextId;
+    int pipeCount;
+    int stationCount;
+
+    if (!(file >> loadedNextId >> pipeCount) ||
+        loadedNextId <= 0 || pipeCount < 0)
+    {
+        cout << "Invalid data" << endl;
+        return false;
+    }
+
+    for (int i = 0; i < pipeCount; i++)
+    {
+        int id;
+        Pipe pipe;
+
+        if (!(file >> id) || id <= 0 || id >= loadedNextId ||
+            !readPipe(file, pipe))
+        {
+            cout << "Invalid pipe data" << endl;
+            return false;
+        }
+
+        if (!loadedPipes.emplace(id, pipe).second)
+        {
+            cout << "Duplicate ID" << endl;
+            return false;
+        }
+    }
+
+    if (!(file >> stationCount) || stationCount < 0)
+    {
+        cout << "Invalid data" << endl;
+        return false;
+    }
+
+    for (int i = 0; i < stationCount; i++)
+    {
+        int id;
+        CompressorStation station;
+
+        if (!(file >> id) || id <= 0 || id >= loadedNextId ||
+            !readStation(file, station))
+        {
+            cout << "Invalid station data" << endl;
+            return false;
+        }
+
+        if (loadedPipes.find(id) != loadedPipes.end() ||
+            !loadedStations.emplace(id, station).second)
+        {
+            cout << "Duplicate ID" << endl;
+            return false;
+        }
+    }
+
+    pipes.swap(loadedPipes);
+    stations.swap(loadedStations);
+    nextId = loadedNextId;
+
+    cout << "Data loaded" << endl;
+    return true;
+}
