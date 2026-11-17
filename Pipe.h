@@ -16,3 +16,9 @@ void printPipe(Pipe pipe);
 void editPipe(Pipe &pipe);
 void editPipes(std::unordered_map<int, Pipe>
 &pipes, const std::vector<int> &ids);
+
+void deletePipes(std::unordered_map<int, Pipe>
+&pipes, const std::vector<int> &ids);
+
+void processFoundPipes(std::unordered_map<int, Pipe>
+&pipes, const std::vector<int> &ids);

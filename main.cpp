@@ -220,14 +220,14 @@ int main()
             case 10:
             {
                 auto ids = findPipesByName(pipes);
-                editPipes(pipes, ids);
+                processFoundPipes(pipes, ids);
                 break;
             }
 
             case 11:
             {
                 auto ids = findPipesByRepair(pipes);
-                editPipes(pipes, ids);
+                processFoundPipes(pipes, ids);
                 break;
             }
 
