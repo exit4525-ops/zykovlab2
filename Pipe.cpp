@@ -1,3 +1,4 @@
+#include "Logger.h"
 #include "Pipe.h"
 
 #include <iostream>
@@ -15,6 +16,7 @@ Pipe inputPipe()
 
     while (!(cin >> pipe.length) || pipe.length <= 0)
     {
+        logAction("Invalid input: Wrong value. Enter length again: ");
         cout << "Wrong value. Enter length again: ";
 
         cin.clear();
@@ -25,6 +27,7 @@ Pipe inputPipe()
 
     while (!(cin >> pipe.diameter) || pipe.diameter <= 0)
     {
+        logAction("Invalid input: Wrong value. Enter diameter again: ");
         cout << "Wrong value. Enter diameter again: ";
 
         cin.clear();
@@ -38,6 +41,7 @@ Pipe inputPipe()
     while (!(cin >> repairValue) ||
            (repairValue != 0 && repairValue != 1))
     {
+        logAction("Invalid input: Wrong value. Enter 1 or 0: ");
         cout << "Wrong value. Enter 1 or 0: ";
 
         cin.clear();
@@ -91,6 +95,8 @@ void editPipes(unordered_map<int, Pipe> &pipes,
         cin.ignore(10000, '\n');
     }
 
+    logAction("Batch mode: " + to_string(mode));
+
     if (mode == 0)
     {
         return;
@@ -130,6 +136,9 @@ void editPipes(unordered_map<int, Pipe> &pipes,
                 cin.ignore(10000, '\n');
             }
 
+            logAction("Batch selection. ID: " + to_string(id)
+                      + ". Selected: " + to_string(selected));
+
             if (selected == 0)
             {
                 continue;
@@ -137,6 +146,8 @@ void editPipes(unordered_map<int, Pipe> &pipes,
         }
 
         it->second.repair = (repair == 1);
+        logAction("Batch pipe edited. ID: " + to_string(id)
+                  + ". Repair: " + to_string(it->second.repair));
         changed++;
     }
 
@@ -163,6 +174,8 @@ void deletePipes(unordered_map<int, Pipe> &pipes,
         cin.ignore(10000, '\n');
     }
 
+    logAction("Batch mode: " + to_string(mode));
+
     if (mode == 0)
     {
         return;
@@ -185,13 +198,19 @@ void deletePipes(unordered_map<int, Pipe> &pipes,
                 cin.ignore(10000, '\n');
             }
 
+            logAction("Batch selection. ID: " + to_string(id)
+                      + ". Selected: " + to_string(selected));
+
             if (selected == 0)
             {
                 continue;
             }
         }
 
-        deleted += pipes.erase(id);
+        int removed = pipes.erase(id);
+        logAction("Batch delete. ID: " + to_string(id)
+                  + ". Removed: " + to_string(removed));
+        deleted += removed;
     }
 
     cout << "Pipes deleted: " << deleted << endl;
@@ -216,6 +235,8 @@ void processFoundPipes(unordered_map<int, Pipe> &pipes,
         cin.clear();
         cin.ignore(10000, '\n');
     }
+
+    logAction("Found pipes action: " + to_string(action));
 
     if (action == 1)
     {

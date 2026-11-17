@@ -1,3 +1,4 @@
+#include "Logger.h"
 #include "CompressorStation.h"
 
 #include <iostream>
@@ -16,6 +17,7 @@ CompressorStation inputStation()
     while (!(cin >> station.workshopCount) ||
            station.workshopCount < 0)
     {
+        logAction("Invalid input: Wrong value. Enter number of workshops again: ");
         cout << "Wrong value. Enter number of workshops again: ";
 
         cin.clear();
@@ -28,6 +30,7 @@ CompressorStation inputStation()
            station.workshopsInOperation < 0 ||
            station.workshopsInOperation > station.workshopCount)
     {
+        logAction("Invalid input: Wrong value. Enter number of workshops in operation again: ");
         cout << "Wrong value. Enter number of workshops in operation again: ";
 
         cin.clear();
@@ -39,6 +42,7 @@ CompressorStation inputStation()
     while (!(cin >> station.stationClass) ||
            station.stationClass < 0)
     {
+        logAction("Invalid input: Wrong value. Enter station class again: ");
         cout << "Wrong value. Enter station class again: ";
 
         cin.clear();
@@ -69,21 +73,26 @@ void editStation(CompressorStation &station)
     while (!(cin >> choice) ||
            (choice != 1 && choice != 2))
     {
+        logAction("Invalid input: Wrong number. Input new choice: ");
         cout << "Wrong number. Input new choice: ";
 
         cin.clear();
         cin.ignore(10000, '\n');
     }
 
+    logAction("Station workshop action: " + to_string(choice));
+
     if (choice == 1)
     {
         if (station.workshopsInOperation < station.workshopCount)
         {
             station.workshopsInOperation++;
+            logAction("Workshop started");
             cout << "Workshop started" << endl;
         }
         else
         {
+            logAction("All workshops are already working");
             cout << "All workshops are already working" << endl;
         }
     }
@@ -92,10 +101,12 @@ void editStation(CompressorStation &station)
         if (station.workshopsInOperation > 0)
         {
             station.workshopsInOperation--;
+            logAction("Workshop stopped");
             cout << "Workshop stopped" << endl;
         }
         else
         {
+            logAction("No working workshops");
             cout << "No working workshops" << endl;
         }
     }

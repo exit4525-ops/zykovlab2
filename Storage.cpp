@@ -1,3 +1,4 @@
+#include "Logger.h"
 #include "Storage.h"
 
 #include <iostream>
@@ -149,6 +150,7 @@ int chooseObjects()
 
     while (!(cin >> choice) || choice < 0 || choice > 3)
     {
+        logAction("Invalid input: Wrong choice. Enter number from 0 to 3: ");
         cout << "Wrong choice. Enter number from 0 to 3: ";
         cin.clear();
         cin.ignore(10000, '\n');
@@ -164,11 +166,13 @@ void saveData(const unordered_map<int, Pipe> &pipes,
     string filename;
     cout << "Enter filename: ";
     getline(cin >> ws, filename);
+    logAction("File requested: " + filename);
 
     ofstream file(filename);
 
     if (!file)
     {
+        logAction("File error: " + filename);
         cout << "File error" << endl;
         return;
     }
@@ -195,9 +199,12 @@ void saveData(const unordered_map<int, Pipe> &pipes,
 
     if (!file)
     {
+        logAction("File error: " + filename);
         cout << "File error" << endl;
         return;
     }
+
+    logAction("Data saved: " + filename);
 
     cout << "Data saved" << endl;
 }
@@ -209,11 +216,13 @@ bool loadData(unordered_map<int, Pipe> &pipes,
     string filename;
     cout << "Enter filename: ";
     getline(cin >> ws, filename);
+    logAction("File requested: " + filename);
 
     ifstream file(filename);
 
     if (!file)
     {
+        logAction("File not found: " + filename);
         cout << "File not found" << endl;
         return false;
     }
@@ -228,6 +237,7 @@ bool loadData(unordered_map<int, Pipe> &pipes,
     if (!(file >> loadedNextId >> pipeCount) ||
         loadedNextId <= 0 || pipeCount < 0)
     {
+        logAction("Invalid data: " + filename);
         cout << "Invalid data" << endl;
         return false;
     }
@@ -240,12 +250,14 @@ bool loadData(unordered_map<int, Pipe> &pipes,
         if (!(file >> id) || id <= 0 || id >= loadedNextId ||
             !readPipe(file, pipe))
         {
+            logAction("Invalid pipe data: " + filename);
             cout << "Invalid pipe data" << endl;
             return false;
         }
 
         if (!loadedPipes.emplace(id, pipe).second)
         {
+            logAction("Duplicate ID: " + filename);
             cout << "Duplicate ID" << endl;
             return false;
         }
@@ -253,6 +265,7 @@ bool loadData(unordered_map<int, Pipe> &pipes,
 
     if (!(file >> stationCount) || stationCount < 0)
     {
+        logAction("Invalid data: " + filename);
         cout << "Invalid data" << endl;
         return false;
     }
@@ -265,6 +278,7 @@ bool loadData(unordered_map<int, Pipe> &pipes,
         if (!(file >> id) || id <= 0 || id >= loadedNextId ||
             !readStation(file, station))
         {
+            logAction("Invalid station data: " + filename);
             cout << "Invalid station data" << endl;
             return false;
         }
@@ -272,6 +286,7 @@ bool loadData(unordered_map<int, Pipe> &pipes,
         if (loadedPipes.find(id) != loadedPipes.end() ||
             !loadedStations.emplace(id, station).second)
         {
+            logAction("Duplicate ID: " + filename);
             cout << "Duplicate ID" << endl;
             return false;
         }
@@ -280,6 +295,8 @@ bool loadData(unordered_map<int, Pipe> &pipes,
     pipes.swap(loadedPipes);
     stations.swap(loadedStations);
     nextId = loadedNextId;
+
+    logAction("Data loaded: " + filename);
 
     cout << "Data loaded" << endl;
     return true;

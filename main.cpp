@@ -2,7 +2,7 @@
 #include "CompressorStation.h"
 #include "Storage.h"
 #include "Search.h"
-
+#include "Logger.h"
 #include <iostream>
 #include <unordered_map>
 
@@ -10,6 +10,7 @@ using namespace std;
 
 int main()
 {
+    logAction("Program started");
     unordered_map<int, Pipe> pipes;
     unordered_map<int, CompressorStation> stations;
 
@@ -42,18 +43,20 @@ int main()
                command < 0 ||
                command > 13)
         {
+            logAction("Invalid menu command");
             cout << "Wrong command. Enter number from 0 to 13: ";
 
             cin.clear();
             cin.ignore(10000, '\n');
         }
 
-
+        logAction("Menu command: " + to_string(command));
         switch (command)
         {
             case 1:
             {
                 pipes.emplace(nextId, inputPipe());
+                logAction("Pipe added. ID: " + to_string(nextId));
                 cout << "Pipe added. ID: " << nextId << endl;
                 nextId++;
                 break;
@@ -63,6 +66,7 @@ int main()
             case 2:
             {
                 stations.emplace(nextId, inputStation());
+                logAction("Station added. ID: " + to_string(nextId));
                 cout << "Station added. ID: " << nextId << endl;
                 nextId++;
                 break;
@@ -119,11 +123,14 @@ int main()
                 if (it != pipes.end())
                 {
                     editPipe(it->second);
+                    logAction("Pipe edited. ID: " + to_string(id)
+                                + ". Repair: " + to_string(it->second.repair));
                     cout << "Pipe repair status changed" << endl;
                 }
                 else
                 {
                     cout << "Pipe not found" << endl;
+                    logAction("Edit failed: pipe not found. ID: " + to_string(id));
                 }
 
                 break;
@@ -147,10 +154,13 @@ int main()
                 if (it != stations.end())
                 {
                     editStation(it->second);
+                    logAction("Station edit completed. ID: " + to_string(id)
+                              + ". Working workshops: " + to_string(it->second.workshopsInOperation));
                 }
                 else
                 {
                     cout << "Station not found" << endl;
+                    logAction("Edit failed: station not found. ID: " + to_string(id));
                 }
 
                 break;
@@ -185,10 +195,12 @@ int main()
                 if (pipes.erase(id))
                 {
                     cout << "Pipe deleted" << endl;
+                    logAction("Pipe deleted. ID: " + to_string(id));
                 }
                 else
                 {
                     cout << "Pipe not found" << endl;
+                    logAction("Delete failed: pipe not found. ID: " + to_string(id));
                 }
 
                 break;
@@ -208,10 +220,12 @@ int main()
                 if (stations.erase(id))
                 {
                     cout << "Station deleted" << endl;
+                    logAction("Station deleted. ID: " + to_string(id));
                 }
-                else 
+                else
                 {
-                    cout << "Statiom not found" << endl;
+                    cout << "Station not found" << endl;
+                    logAction("Delete failed: station not found. ID: " + to_string(id));
                 }
 
                 break;
@@ -254,5 +268,6 @@ int main()
         }
     }
 
+    logAction("Program finished");
     return 0;
 }

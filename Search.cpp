@@ -1,3 +1,4 @@
+#include "Logger.h"
 #include "Search.h"
 
 #include <iostream>
@@ -10,6 +11,7 @@ vector<int> findPipesByName(const unordered_map<int, Pipe> &pipes)
     string name;
     cout << "Enter pipe name or part of name: ";
     getline(cin >> ws, name);
+    logAction("Search by name: " + name);
 
     vector<int> foundIds;
 
@@ -30,6 +32,7 @@ vector<int> findPipesByName(const unordered_map<int, Pipe> &pipes)
         cout << "No pipes found" << endl;
     }
 
+    logAction("Pipe search results: " + to_string(foundIds.size()));
     return foundIds;
 }
 
@@ -40,11 +43,13 @@ vector<int> findPipesByRepair(const unordered_map<int, Pipe> &pipes)
 
     while (!(cin >> repair) || (repair != 0 && repair != 1))
     {
+        logAction("Invalid input: Wrong value. Enter 1 or 0: ");
         cout << "Wrong value. Enter 1 or 0: ";
         cin.clear();
         cin.ignore(10000, '\n');
     }
 
+    logAction("Search repair status: " + to_string(repair));
     vector<int> foundIds;
 
     for (const auto &item : pipes)
@@ -62,6 +67,7 @@ vector<int> findPipesByRepair(const unordered_map<int, Pipe> &pipes)
     {
         cout << "No pipes found" << endl;
     }
+    logAction("Pipe search results: " + to_string(foundIds.size()));
     return foundIds;
 }
 
@@ -71,7 +77,9 @@ void findStationsByName(
     string name;
     cout << "Enter station name or part of name: ";
     getline(cin >> ws, name);
+    logAction("Search by name: " + name);
 
+    int resultCount = 0;
     bool found = false;
 
     for (const auto &item : stations)
@@ -82,8 +90,11 @@ void findStationsByName(
             printCompressorStation(item.second);
             cout << endl;
             found = true;
+            resultCount++;
         }
     }
+
+    logAction("Station search results: " + to_string(resultCount));
 
     if (!found)
     {
@@ -100,11 +111,14 @@ void findStationsByUnusedPercent(
     while (!(cin >> threshold) || !isfinite(threshold) ||
            threshold < 0 || threshold > 100)
     {
+        logAction("Invalid input: Wrong value. Enter a percentage from 0 to 100: ");
         cout << "Wrong value. Enter a percentage from 0 to 100: ";
         cin.clear();
         cin.ignore(10000, '\n');
     }
 
+    logAction("Search unused percentage threshold: " + to_string(threshold));
+    int resultCount = 0;
     bool found = false;
 
     for (const auto &item : stations)
@@ -127,8 +141,11 @@ void findStationsByUnusedPercent(
             cout << "Unused workshops: " << unusedPercent << "%" << endl;
             cout << endl;
             found = true;
+            resultCount++;
         }
     }
+
+    logAction("Station search results: " + to_string(resultCount));
 
     if (!found)
     {

@@ -2,3 +2,4 @@ main
 *.dSYM/
 .vscode/
 .DS_Store
+actions.log

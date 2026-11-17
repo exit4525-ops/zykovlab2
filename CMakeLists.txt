@@ -11,4 +11,5 @@ add_executable(zykovlab2
     CompressorStation.cpp
     Storage.cpp
     Search.cpp
+    Logger.cpp
 )
