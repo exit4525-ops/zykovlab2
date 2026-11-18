@@ -5,7 +5,7 @@
 
 using namespace std;
 
-void savePipe(ofstream &file, Pipe pipe)
+void savePipe(ofstream &file, const Pipe &pipe)
 {
     file << pipe.name << endl;
     file << pipe.length << endl;
@@ -13,56 +13,12 @@ void savePipe(ofstream &file, Pipe pipe)
     file << pipe.repair << endl;
 }
 
-void saveStation(ofstream &file, CompressorStation station)
+void saveStation(ofstream &file, const CompressorStation &station)
 {
     file << station.name << endl;
     file << station.workshopCount << endl;
     file << station.workshopsInOperation << endl;
     file << station.stationClass << endl;
-}
-
-void savePipeToFile(Pipe pipe)
-{
-    ofstream file("Pipedata.txt");
-
-    if (!file)
-    {
-        cout << "File error" << endl;
-        return;
-    }
-
-    savePipe(file, pipe);
-    file.close();
-
-    if (!file)
-    {
-        cout << "File error" << endl;
-        return;
-    }
-
-    cout << "Pipe saved" << endl;
-}
-
-void saveStationToFile(CompressorStation station)
-{
-    ofstream file("Stationdata.txt");
-
-    if (!file)
-    {
-        cout << "File error" << endl;
-        return;
-    }
-
-    saveStation(file, station);
-    file.close();
-
-    if (!file)
-    {
-        cout << "File error" << endl;
-        return;
-    }
-
-    cout << "Station saved" << endl;
 }
 
 bool readPipe(ifstream &file, Pipe &pipe)
@@ -96,67 +52,6 @@ bool readStation(ifstream &file, CompressorStation &station)
 
     station = loadedStation;
     return true;
-}
-
-bool loadPipeFromFile(Pipe &pipe)
-{
-    ifstream file("Pipedata.txt");
-
-    if (!file)
-    {
-        cout << "File not found" << endl;
-        return false;
-    }
-
-    if (!readPipe(file, pipe))
-    {
-        cout << "Invalid pipe data" << endl;
-        return false;
-    }
-
-    cout << "Pipe loaded" << endl;
-    return true;
-}
-
-bool loadStationFromFile(CompressorStation &station)
-{
-    ifstream file("Stationdata.txt");
-
-    if (!file)
-    {
-        cout << "File not found" << endl;
-        return false;
-    }
-
-    if (!readStation(file, station))
-    {
-        cout << "Invalid station data" << endl;
-        return false;
-    }
-
-    cout << "Station loaded" << endl;
-    return true;
-}
-
-int chooseObjects()
-{
-    int choice;
-
-    cout << "1. Pipe only (Pipedata.txt)" << endl;
-    cout << "2. Station only (Stationdata.txt)" << endl;
-    cout << "3. Both objects (data.txt)" << endl;
-    cout << "0. Back" << endl;
-    cout << "Enter choice: ";
-
-    while (!(cin >> choice) || choice < 0 || choice > 3)
-    {
-        logAction("Invalid input: Wrong choice. Enter number from 0 to 3: ");
-        cout << "Wrong choice. Enter number from 0 to 3: ";
-        cin.clear();
-        cin.ignore(10000, '\n');
-    }
-
-    return choice;
 }
 
 void saveData(const unordered_map<int, Pipe> &pipes,
